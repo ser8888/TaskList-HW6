@@ -9,9 +9,7 @@ import UIKit
 
 class TaskListViewController: UITableViewController {
     
-//    private let viewContext = (UIApplication.shared.delegate as! StorageManager).persistentContainer.viewContext
     private let viewContext = StorageManager.shared.persistentContainer.viewContext
-    
     
     private let cellID = "task"
     private var taskList: [Task] = []
@@ -53,10 +51,6 @@ class TaskListViewController: UITableViewController {
     @objc private func addNewTask() {
         showAlert(withTitle: "Create Task", andMessage: "What do you want to do?")
     }
-    
-//    @objc private func updateTask() {
-//        showAlertUpdate(_ task, withTitle: "Edit Task", andMessage: "What do you want to do?")
-//    }
     
     private func fetchData() {
         let fetchRequest = Task.fetchRequest()
@@ -101,14 +95,11 @@ class TaskListViewController: UITableViewController {
         present(alert, animated: true)
     }
     private func update(_ task: Task, updatedTask: String) {
- //       let task = Task(context: viewContext)
         task.title = updatedTask
         guard let indexPath = tableView.indexPathForSelectedRow else { return }
 
         print("INDEXPATH UPDATING-- ",indexPath.row, updatedTask)
       
-        
-        
         if viewContext.hasChanges {
             do {
                 try viewContext.save()
@@ -147,21 +138,6 @@ class TaskListViewController: UITableViewController {
             }
         }
     }
-    
-//    private func delete(forRowAt indexPath: IndexPath) {
-//      photos.remove(at: indexPath.row)
-//      dataManager.deletePhoto(indexPath: indexPath)
-//      tableView.deleteRows(at: [indexPath], with: .fade)
-//    }
-    
-//    func deletePhoto(indexPath: IndexPath) {
-//      let photos = fetchPhotos()
-//      context.delete(photos[indexPath.row])
-//      saveContext()
-//    }
-    
-    
-    
 }
 
 extension TaskListViewController {
@@ -184,14 +160,11 @@ extension TaskListViewController {
         showAlertUpdate(task: task, withTitle: "Edit Task", andMessage: "You can edit your task")
     }
     
-    
-
-
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-    if editingStyle == .delete {
-        print("INDEXPATH -- ",indexPath.row)
-        delete(forRowAt: indexPath)
+        if editingStyle == .delete {
+            print("INDEXPATH -- ",indexPath.row)
+            delete(forRowAt: indexPath)
+        }
     }
-  }
 }
