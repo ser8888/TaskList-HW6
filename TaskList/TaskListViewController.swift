@@ -51,7 +51,11 @@ class TaskListViewController: UITableViewController {
     }
     
     @objc private func addNewTask() {
-        showAlert(withTitle: "New Task", andMessage: "What do you want to do?")
+        showAlert(withTitle: "Create Task", andMessage: "What do you want to do?")
+    }
+    
+    @objc private func updateTask() {
+        showAlertUpdate(withTitle: "Edit Task", andMessage: "What do you want to do?")
     }
     
     private func fetchData() {
@@ -80,14 +84,27 @@ class TaskListViewController: UITableViewController {
         present(alert, animated: true)
     }
     
+    private func showAlertUpdate(withTitle title: String, andMessage message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let saveAction = UIAlertAction(title: "Update", style: .default) { [unowned self] _ in
+            guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
+            save(task)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        alert.addTextField { textField in
+            textField.placeholder = "edit"
+        }
+        
+        present(alert, animated: true)
+    }
     private func save(_ taskName: String) {
         let task = Task(context: viewContext)
         task.title = taskName
         taskList.append(task)
-        
         let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
         tableView.insertRows(at: [cellIndex], with: .automatic)
-        
         if viewContext.hasChanges {
             do {
                 try viewContext.save()
@@ -96,6 +113,33 @@ class TaskListViewController: UITableViewController {
             }
         }
     }
+    private func delete(forRowAt indexPath: IndexPath) {
+        viewContext.delete(taskList[indexPath.row])
+        taskList.remove(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .automatic)
+       if viewContext.hasChanges {
+            do {
+                try viewContext.save()
+            } catch let error {
+                print("ERRROR COREDATA--",error.localizedDescription)
+            }
+        }
+    }
+    
+//    private func delete(forRowAt indexPath: IndexPath) {
+//      photos.remove(at: indexPath.row)
+//      dataManager.deletePhoto(indexPath: indexPath)
+//      tableView.deleteRows(at: [indexPath], with: .fade)
+//    }
+    
+//    func deletePhoto(indexPath: IndexPath) {
+//      let photos = fetchPhotos()
+//      context.delete(photos[indexPath.row])
+//      saveContext()
+//    }
+    
+    
+    
 }
 
 extension TaskListViewController {
@@ -111,4 +155,18 @@ extension TaskListViewController {
         cell.contentConfiguration = content
         return cell
     }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let track = results[indexPath.row]
+          showAlertUpdate(withTitle: "Edit Task", andMessage: "You can edit your task")
+    }
+
+
+
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    if editingStyle == .delete {
+        print("INDEXPATH -- ",indexPath.row)
+        delete(forRowAt: indexPath)
+    }
+  }
 }
